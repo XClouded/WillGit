@@ -1,4 +1,4 @@
-package com.willin.server;
+package com.willin.server.timesvr;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -11,16 +11,22 @@ import org.apache.mina.transport.socket.SocketAcceptor;
 import org.apache.mina.transport.socket.SocketSessionConfig;
 import org.apache.mina.transport.socket.nio.NioSocketAcceptor;
 
-import com.willin.server.handler.MsgCountServerHandler;
-import com.willin.server.handler.TimeServerHandler;
+import com.willin.server.ServerImpl;
 
-///1 1 1 1 
-public class MainServer {
+public class TimeServer extends ServerImpl {
 
-	public static final int SERVER_PORT = 8999;
+	public static final int TIME_SERVIER_PORT = 8080;
 	public static final int RECEIVER_BUFFER_SIZE = 2048;
 	
-	public static void main( String[] args ) throws Exception{
+	// ============================================================================== 
+	// Override the super.start
+	// Using the NioSocketAcceptor for Time reply server
+	// Just return the date's string, so simple
+	// 
+	@Override 
+	public int start( int port ) {
+		
+		super.start(port);
 		
 		SocketAcceptor acceptor = new NioSocketAcceptor();
 		
@@ -29,22 +35,29 @@ public class MainServer {
 		
 		DefaultIoFilterChainBuilder chain = acceptor.getFilterChain();
 		//设定这个过滤器将一行一行（/r/n）的读取数据  
-        chain.addLast( "myChain", new ProtocolCodecFilter( new TextLineCodecFactory( Charset.forName("UTF-8") ) ) );
+        chain.addLast( "TimeServerChain", new ProtocolCodecFilter( new TextLineCodecFactory( Charset.forName("UTF-8") ) ) );
 		
         acceptor.setHandler( new TimeServerHandler() );
         
         // 绑定接口，启动服务器
         try
         {
-        	acceptor.bind( new InetSocketAddress(SERVER_PORT) );
-        	System.out.println("Mina server is listing port:" + SERVER_PORT);
+        	acceptor.bind( new InetSocketAddress(port) );
+        	System.out.println("Mina server is listing port:" + port);
         }
         catch( IOException e )
         {
         	e.printStackTrace();
         }
+		
+		return OK;
+		
 	}
 	
+	
+	
+	
 }
+
 
 // end of file
